@@ -1,27 +1,16 @@
-<?php
-// prénom attendu (en minuscules)
-$prenomAutorise = 'barbara';
-
-$erreur = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $prenomSaisi = strtolower(trim(isset($_POST['prenom']) ? $_POST['prenom'] : ''));
-
-    if ($prenomSaisi === $prenomAutorise) {
-        // redirection vers la page principale
-        header('Location: index.php');
-        exit;
-    } else {
-        $erreur = "CASSE TOI T'ES PAS MA FEMME !!!";
-    }
-}
-?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>Connexion secrète</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- FAVICONS -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png">
+    <link rel="shortcut icon" href="assets/img/favicon.ico">
+
     <style>
         * {
             box-sizing: border-box;
@@ -122,11 +111,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 0.8rem;
             color: #c06b8b;
             opacity: 0.85;
+            display: none;
         }
         .error {
             margin-top: 0.75rem;
             font-size: 0.85rem;
             color: #c0392b;
+            display: none;
         }
         @media (max-width: 480px) {
             .container {
@@ -140,20 +131,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 <div class="container">
-    <h1>On est déjà le 14 ? </h1>
+    <h1>On est déjà le 14 ?</h1>
     <p class="subtitle">Coucou toi ! Joyeuse Saint-Valentin 💌</p>
 
-    <form method="post" autocomplete="off">
+    <form id="loginForm" autocomplete="off">
         <label for="prenom">Entre ton prénom pour continuer :</label>
         <input type="text" id="prenom" name="prenom" required>
 
         <button type="submit">Ouvrir la surprise</button>
 
-        <?php if (!empty($erreur)): ?>
-            <p class="hint">écris en minuscule</p>
-            <p class="error"><?= htmlspecialchars($erreur, ENT_QUOTES, 'UTF-8') ?></p>
-        <?php endif; ?>
+        <p class="hint" id="hintMsg">écris en minuscule</p>
+        <p class="error" id="errorMsg">CASSE TOI T'ES PAS MA FEMME !!!</p>
     </form>
 </div>
+
+<script>
+    const loginForm = document.getElementById('loginForm');
+    const prenomInput = document.getElementById('prenom');
+    const errorMsg = document.getElementById('errorMsg');
+    const hintMsg = document.getElementById('hintMsg');
+
+    // Prénom attendu (en minuscules)
+    const PRENOM_AUTORISE = 'barbara';
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const prenomSaisi = prenomInput.value.trim().toLowerCase();
+
+        if (prenomSaisi === PRENOM_AUTORISE) {
+            // Redirection vers la page principale
+            window.location.href = 'index.html';
+        } else {
+            // Afficher l'erreur
+            errorMsg.style.display = 'block';
+            hintMsg.style.display = 'block';
+            prenomInput.style.borderColor = '#c0392b';
+            prenomInput.value = '';
+
+            // Réinitialiser après 3s
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+                hintMsg.style.display = 'none';
+                prenomInput.style.borderColor = '#ffc0d9';
+            }, 3000);
+        }
+    });
+</script>
 </body>
 </html>
