@@ -89,6 +89,11 @@
             box-shadow: 0 0 0 3px rgba(255, 123, 171, 0.25);
             transform: translateY(-1px);
         }
+        input[type="text"]:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
         button {
             margin-top: 0.2rem;
             padding: 0.75rem 1rem;
@@ -102,9 +107,14 @@
             box-shadow: 0 10px 25px rgba(255, 105, 180, 0.4);
             transition: transform 0.1s ease, box-shadow 0.1s ease;
         }
-        button:active {
+        button:active:not(:disabled) {
             transform: translateY(1px);
             box-shadow: 0 6px 15px rgba(255, 105, 180, 0.3);
+        }
+        button:disabled {
+            background: linear-gradient(135deg, #d4a5b8, #c98ea6);
+            cursor: not-allowed;
+            opacity: 0.6;
         }
         .hint {
             margin-top: 0.5rem;
@@ -119,6 +129,13 @@
             color: #c0392b;
             display: none;
         }
+        .countdown {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #ff4f8b;
+            font-weight: 600;
+            display: none;
+        }
         @media (max-width: 480px) {
             .container {
                 padding: 2rem 1.4rem;
@@ -131,31 +148,108 @@
 </head>
 <body>
 <div class="container">
-    <h1>On est déjà le 14 ?</h1>
-    <p class="subtitle">Coucou toi ! Joyeuse Saint-Valentin 💌</p>
+    <h1 id="mainTitle">On est déjà le 14 ?</h1>
+    <p class="subtitle" id="subtitle">Coucou toi ! Joyeuse Saint-Valentin 💌</p>
 
     <form id="loginForm" autocomplete="off">
         <label for="prenom">Entre ton prénom pour continuer :</label>
         <input type="text" id="prenom" name="prenom" required>
 
-        <button type="submit">Ouvrir la surprise</button>
+        <button type="submit" id="submitBtn">Ouvrir la surprise</button>
 
-        <p class="hint" id="hintMsg">écris en minuscule</p>
+        <p class="countdown" id="countdownMsg"></p>
         <p class="error" id="errorMsg">CASSE TOI T'ES PAS MA FEMME !!!</p>
+        <p class="hint" id="hintMsg">écris en minuscule</p>
     </form>
 </div>
 
 <script>
     const loginForm = document.getElementById('loginForm');
     const prenomInput = document.getElementById('prenom');
+    const submitBtn = document.getElementById('submitBtn');
     const errorMsg = document.getElementById('errorMsg');
     const hintMsg = document.getElementById('hintMsg');
+    const countdownMsg = document.getElementById('countdownMsg');
+    const mainTitle = document.getElementById('mainTitle');
+    const subtitle = document.getElementById('subtitle');
 
     // Prénom attendu (en minuscules)
     const PRENOM_AUTORISE = 'barbara';
 
+    // Date de déblocage (14 février 2026 à minuit, heure de Paris)
+    const DATE_DEBLOCAGE = new Date('2026-02-14T00:00:00+01:00');
+
+    // Fonction pour mettre à jour le compte à rebours
+    function mettreAJourCountdown() {
+        const maintenant = new Date();
+
+        if (maintenant < DATE_DEBLOCAGE) {
+            // Bloquer l'accès
+            prenomInput.disabled = true;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '🔒 Surprise verrouillée';
+
+            mainTitle.textContent = 'Pas encore...';
+            subtitle.textContent = 'Un peu de patience 💕';
+
+            // Calculer le temps restant
+            const diff = DATE_DEBLOCAGE - maintenant;
+            const jours = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const heures = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secondes = Math.floor((diff % (1000 * 60)) / 1000);
+
+            let texteCountdown = '⏰ Déblocage dans ';
+            if (jours > 0) {
+                texteCountdown += `${jours} jour${jours > 1 ? 's' : ''} `;
+            }
+            if (heures > 0 || jours > 0) {
+                texteCountdown += `${heures}h `;
+            }
+            if (minutes > 0 || heures > 0 || jours > 0) {
+                texteCountdown += `${minutes}min `;
+            }
+            texteCountdown += `${secondes}s`;
+
+            countdownMsg.textContent = texteCountdown;
+            countdownMsg.style.display = 'block';
+
+            return false;
+        } else {
+            // Débloqué
+            prenomInput.disabled = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Ouvrir la surprise';
+
+            mainTitle.textContent = 'On est déjà le 14 ?';
+            subtitle.textContent = 'Coucou toi ! Joyeuse Saint-Valentin 💌';
+
+            countdownMsg.style.display = 'none';
+
+            return true;
+        }
+    }
+
+    // Vérifier au chargement
+    mettreAJourCountdown();
+
+    // Mettre à jour toutes les secondes (changé de 60000 à 1000)
+    setInterval(mettreAJourCountdown, 1000);
+
+    // Soumettre le formulaire
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
+
+        // Vérifier que c'est débloqué
+        if (!mettreAJourCountdown()) {
+            errorMsg.textContent = 'Patience... la surprise se débloque le 14 février à minuit 💕';
+            errorMsg.style.display = 'block';
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+                errorMsg.textContent = 'CASSE TOI T\'ES PAS MA FEMME !!!';
+            }, 3000);
+            return;
+        }
 
         const prenomSaisi = prenomInput.value.trim().toLowerCase();
 
