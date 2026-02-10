@@ -10,6 +10,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const nextBtn = envelope.querySelector('.envelope-nav .next');
 
         let currentIndex = 0;
+        let isAnimating = false;
+
+        // Transition slide entre deux images
+        function slideTo(newIndex, direction) {
+            if (isAnimating || newIndex === currentIndex || images.length <= 1) return;
+            isAnimating = true;
+
+            const outClass = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
+            const inClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
+
+            const oldImg = images[currentIndex];
+            const newImg = images[newIndex];
+
+            // Lancer les animations
+            oldImg.classList.remove('active');
+            oldImg.classList.add(outClass);
+
+            newImg.classList.add(inClass);
+
+            // Nettoyer après l'animation
+            const onEnd = () => {
+                oldImg.classList.remove(outClass);
+                oldImg.style.opacity = '0';
+
+                newImg.classList.remove(inClass);
+                newImg.classList.add('active');
+
+                currentIndex = newIndex;
+                isAnimating = false;
+                newImg.removeEventListener('animationend', onEnd);
+            };
+
+            newImg.addEventListener('animationend', onEnd);
+        }
 
         // Ouvrir l'enveloppe au clic
         outer.addEventListener('click', (e) => {
@@ -28,9 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (prevBtn) {
             prevBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                images[currentIndex].classList.remove('active');
-                currentIndex = (currentIndex - 1 + images.length) % images.length;
-                images[currentIndex].classList.add('active');
+                const newIndex = (currentIndex - 1 + images.length) % images.length;
+                slideTo(newIndex, 'prev');
             });
         }
 
@@ -38,9 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nextBtn) {
             nextBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                images[currentIndex].classList.remove('active');
-                currentIndex = (currentIndex + 1) % images.length;
-                images[currentIndex].classList.add('active');
+                const newIndex = (currentIndex + 1) % images.length;
+                slideTo(newIndex, 'next');
             });
         }
 
@@ -48,26 +80,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const imagesContainer = envelope.querySelector('.envelope-images');
         if (imagesContainer && images.length > 1) {
             let touchStartX = 0;
-            let touchEndX = 0;
+            let touchStartY = 0;
+            let isSwiping = false;
 
             imagesContainer.addEventListener('touchstart', (e) => {
                 touchStartX = e.changedTouches[0].screenX;
+                touchStartY = e.changedTouches[0].screenY;
+                isSwiping = true;
             }, { passive: true });
 
+            imagesContainer.addEventListener('touchmove', (e) => {
+                if (!isSwiping) return;
+                const diffX = Math.abs(e.changedTouches[0].screenX - touchStartX);
+                const diffY = Math.abs(e.changedTouches[0].screenY - touchStartY);
+                // Si le swipe est plus horizontal que vertical, empêcher le scroll
+                if (diffX > diffY && diffX > 10) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
             imagesContainer.addEventListener('touchend', (e) => {
-                touchEndX = e.changedTouches[0].screenX;
+                if (!isSwiping) return;
+                isSwiping = false;
+                const touchEndX = e.changedTouches[0].screenX;
                 const diff = touchStartX - touchEndX;
 
-                if (Math.abs(diff) > 50) {
-                    images[currentIndex].classList.remove('active');
+                if (Math.abs(diff) > 40) {
                     if (diff > 0) {
                         // Swipe gauche → photo suivante
-                        currentIndex = (currentIndex + 1) % images.length;
+                        const newIndex = (currentIndex + 1) % images.length;
+                        slideTo(newIndex, 'next');
                     } else {
                         // Swipe droite → photo précédente
-                        currentIndex = (currentIndex - 1 + images.length) % images.length;
+                        const newIndex = (currentIndex - 1 + images.length) % images.length;
+                        slideTo(newIndex, 'prev');
                     }
-                    images[currentIndex].classList.add('active');
                 }
             }, { passive: true });
         }

@@ -247,12 +247,58 @@ body.valentine-body::after {
     height: 100%;
     object-fit: cover;
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transform: translateX(0);
+    will-change: transform, opacity;
+    transition: none;
+    z-index: 0;
 }
 
 .envelope-images img.active {
     opacity: 1;
+    z-index: 2;
+    transform: translateX(0);
+}
+
+/* Slide vers la gauche (next) */
+.envelope-images img.slide-out-left {
+    animation: slideOutLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     z-index: 1;
+}
+
+.envelope-images img.slide-in-right {
+    animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    z-index: 2;
+}
+
+/* Slide vers la droite (prev) */
+.envelope-images img.slide-out-right {
+    animation: slideOutRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    z-index: 1;
+}
+
+.envelope-images img.slide-in-left {
+    animation: slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    z-index: 2;
+}
+
+@keyframes slideOutLeft {
+    from { transform: translateX(0); opacity: 1; }
+    to   { transform: translateX(-100%); opacity: 0; }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to   { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-100%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
 }
 
 /* Navigation du carrousel */
@@ -293,6 +339,95 @@ body.valentine-body::after {
     text-align: center;
     margin-top: 0.75rem;
     font-style: italic;
+}
+
+/* ===== ENVELOPPE SPÉCIALE SAINT-VALENTIN ===== */
+.envelope-locked {
+    cursor: default;
+}
+
+.envelope-locked .envelope-outer-special {
+    background: linear-gradient(135deg, #fff 0%, #fff0f5 50%, #ffe4f1 100%);
+    border: 2px dashed #ffb3d9;
+    position: relative;
+    overflow: hidden;
+}
+
+.envelope-locked .envelope-outer-special::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255, 179, 217, 0.08) 10px,
+        rgba(255, 179, 217, 0.08) 20px
+    );
+    z-index: 1;
+    pointer-events: none;
+}
+
+.envelope-locked .envelope-outer-special:hover {
+    transform: translateY(-3px) scale(1.01);
+    cursor: not-allowed;
+}
+
+.envelope-flap-special {
+    background: linear-gradient(135deg, #ff9ec7 0%, #ff6fa3 100%) !important;
+    opacity: 0.6;
+}
+
+.envelope-body-special {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.envelope-lock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    z-index: 2;
+    position: relative;
+}
+
+.lock-icon {
+    font-size: 2rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+.envelope-label-special {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #e0457b;
+    letter-spacing: 0.5px;
+}
+
+.envelope-teaser {
+    font-size: 0.9rem;
+    color: #c06b8b;
+    font-style: italic;
+    text-align: center;
+    padding: 0 1rem;
+}
+
+.envelope-countdown-hint {
+    font-size: 0.8rem;
+    color: #d4849e;
+    margin-top: 0.2rem;
+    animation: fadeInOut 3s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
 }
 
 /* ===== RESPONSIVE ===== */
