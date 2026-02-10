@@ -43,6 +43,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 images[currentIndex].classList.add('active');
             });
         }
+
+        // Swipe tactile sur les images (mobile)
+        const imagesContainer = envelope.querySelector('.envelope-images');
+        if (imagesContainer && images.length > 1) {
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            imagesContainer.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            imagesContainer.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                const diff = touchStartX - touchEndX;
+
+                if (Math.abs(diff) > 50) {
+                    images[currentIndex].classList.remove('active');
+                    if (diff > 0) {
+                        // Swipe gauche → photo suivante
+                        currentIndex = (currentIndex + 1) % images.length;
+                    } else {
+                        // Swipe droite → photo précédente
+                        currentIndex = (currentIndex - 1 + images.length) % images.length;
+                    }
+                    images[currentIndex].classList.add('active');
+                }
+            }, { passive: true });
+        }
     });
 
     // Fermer l'enveloppe en cliquant en dehors
