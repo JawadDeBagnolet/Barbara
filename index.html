@@ -152,8 +152,7 @@
     <p class="subtitle" id="subtitle">Coucou toi ! Joyeuse Saint-Valentin 💌</p>
 
     <form id="loginForm" autocomplete="off">
-        <label for="prenom">Entre ton prénom pour continuer :</label>
-        <input type="text" id="prenom" name="prenom" required>
+        <input type="text" id="prenom" name="prenom" required placeholder="Prénom">
 
         <button type="submit" id="submitBtn">Ouvrir la surprise</button>
 
@@ -189,8 +188,8 @@
             submitBtn.disabled = true;
             submitBtn.textContent = '🔒 Surprise verrouillée';
 
-            mainTitle.textContent = 'Pas encore...';
-            subtitle.textContent = 'Un peu de patience 💕';
+            mainTitle.textContent = 'Coucou toi ! Joyeuse Saint-Valentin 💌';
+            subtitle.textContent = 'Un peu de patience... 💕';
 
             // Calculer le temps restant
             const diff = DATE_DEBLOCAGE - maintenant;
